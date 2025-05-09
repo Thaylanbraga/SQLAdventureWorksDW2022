@@ -18,3 +18,31 @@ FROM FactResellerSales RS
 INNER JOIN DimReseller R ON R.ResellerKey = RS.ResellerKey
 INNER JOIN DimGeography G ON G.GeographyKey = R.ResellerKey
 GROUP BY G.EnglishCountryRegionName
+
+--VAMOS VERIFICAR QUAIS SÃO OS MAIORES REVENDEDORES
+SELECT R.ResellerName AS NOME_REVENDEDORES
+	,SUM(RS.ExtendedAmount) AS VALOR_TOTAL_DE_VENDAS
+FROM FactResellerSales RS
+INNER JOIN DimReseller R ON R.ResellerKey = RS.ResellerKey
+INNER JOIN DimGeography G ON G.GeographyKey = R.ResellerKey
+GROUP BY R.ResellerName
+ORDER BY 2 DESC
+
+--VAMOS VERIFICAR QUAIS OS PRODUTOS MAIS VENDIDOS
+SELECT P.EnglishProductName
+	,SUM(RS.ExtendedAmount) AS VALOR_TOTAL_DE_VENDAS
+FROM FactResellerSales RS
+INNER JOIN DimProduct P ON P.ProductKey = RS.ProductKey
+GROUP BY P.EnglishProductName
+ORDER BY 2 DESC
+
+
+-- VAMOS VERIFICAR QUAL A CATEGORIA DE PRODUTO QUE TEM MAIS VALOR
+SELECT PC.EnglishProductCategoryName
+	,SUM(RS.ExtendedAmount) AS VALOR_TOTAL_DE_VENDAS
+FROM FactResellerSales RS
+INNER JOIN DimProduct P ON P.ProductKey = RS.ProductKey
+INNER JOIN DimProductSubcategory PS ON PS.ProductSubcategoryKey = P.ProductSubcategoryKey
+INNER JOIN DimProductCategory PC ON PC.ProductCategoryKey = PS.ProductCategoryKey
+GROUP BY PC.EnglishProductCategoryName
+ORDER BY 2 DESC
