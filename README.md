@@ -46,3 +46,26 @@ INNER JOIN DimProductSubcategory PS ON PS.ProductSubcategoryKey = P.ProductSubca
 INNER JOIN DimProductCategory PC ON PC.ProductCategoryKey = PS.ProductCategoryKey
 GROUP BY PC.EnglishProductCategoryName
 ORDER BY 2 DESC
+
+--Iremos verificar agora os 5 produtos mais vendidos por categoria, usando PARTITION BY, técnica de SQL CTE e WINDOWS FUNCTION
+WITH VENDASCATEGORIAS(NOME_CATEGORIA, NOME_PRODUTO, VALOR_TOTAL_DE_VENDAS, RANK_CATEGORIAS)AS 
+(
+
+SELECT PC.EnglishProductCategoryName AS NOME_CATEGORIA
+	,P.EnglishProductName AS NOME_PRODUTO
+	,SUM(RS.ExtendedAmount) AS VALOR_TOTAL_DE_VENDAS
+	,RANK() OVER(PARTITION BY PC.EnglishProductCategoryName ORDER BY SUM(RS.ExtendedAmount) DESC) AS RANK_CATEGORIAS
+FROM FactResellerSales RS
+INNER JOIN DimProduct P ON P.ProductKey = RS.ProductKey
+INNER JOIN DimProductSubcategory PS ON PS.ProductSubcategoryKey = P.ProductSubcategoryKey
+INNER JOIN DimProductCategory PC ON PC.ProductCategoryKey = PS.ProductCategoryKey
+GROUP BY PC.EnglishProductCategoryName, P.EnglishProductName
+)
+
+SELECT NOME_CATEGORIA
+	,NOME_PRODUTO
+	,VALOR_TOTAL_DE_VENDAS
+	,RANK_CATEGORIAS
+FROM VENDASCATEGORIAS
+WHERE RANK_CATEGORIAS <=5
+ORDER BY NOME_CATEGORIA
